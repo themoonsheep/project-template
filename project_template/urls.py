@@ -22,5 +22,16 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('moonsheep/', include('moonsheep.urls')),
 
+    # Create new home view here if you want a welcome page
     path('', TranscriptionView.as_view(), name='transcription'),
+
+    path('transcription', TranscriptionView.as_view(), name='transcription'),
 ]
+
+# DEV-DEBUG
+from django.conf import settings
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns = [
+        path('__debug__/', include(debug_toolbar.urls)),
+    ] + urlpatterns

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<div class="container-fluid">
+  <div class="row">
+    <div id="presenter">
+      {% block task-presenter %}
+        {% include presenter.template %}
+      {% endblock %}
+    </div>
+    <div id="task">
+      {% block task-form %}
+        {% if task.task_form_template %}
+          {% include task.task_form_template %}
+        {% else %}
+            {# Default layout to render form #}
+            <form id="taskForm" method="post">
+            {% csrf_token %}
+            <div class="row-fluid">
+                <div class="col">
+                    {% for field in form %}
+                    <div class="form-group">
+                        <div class="col">
+                            {{ field.label }}
+                        </div>
+                        <div class="col">
+                            {{ field }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="row-fluid">
+                <div class="col">
+                    <button class="btn .bg btn-lg" type="submit">Send & give me one more</button>
+                    <button class="btn .bg btn-sm" type="submit">Finish for today</button>
+                </div>
+            </div>
+        </form>
+        {% endif %}
+      {% endblock %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{#<script src="{% static "js/transcript.js" %}"></script>#}
+{% endblock %}
