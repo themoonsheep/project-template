@@ -13,19 +13,19 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
+from django.contrib.admin import site
 from django.urls import path, include
 from .views import *
-from .tasks import * # Keep it to make Moonsheep aware of defined tasks
+from .tasks import *  # Keep it to make Moonsheep aware of defined tasks in DEVELOPMENT_MODE
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('admin/', site.urls),
     path('moonsheep/', include('moonsheep.urls')),
 
     # Create new home view here if you want a welcome page
-    path('', TranscriptionView.as_view(), name='transcription'),
+    path('', TranscriptionView.as_view(), name='task'),
 
-    path('transcription', TranscriptionView.as_view(), name='transcription'),
+    path('task', TranscriptionView.as_view(), name='task'),
 ]
 
 # DEV-DEBUG

@@ -6,30 +6,29 @@ from moonsheep import verifiers
 from .forms import *
 from .models import *
 
+from unittest.mock import MagicMock
+
 
 class TaskWithForm(AbstractTask):
-    # task_template = 'task.html'
     task_form = SimpleForm
-    # task_form_template = 'tasks/simple.html'
 
-    # verify_page = EqualsVerifier
-    #
-    # def verify_party_name(self, values):
-    #     return values[0], 1
-    #
-    # def save_verified_data(self, verified_data):
-    #     party, created = PoliticalParty.objects.get_or_create(
-    #         name=verified_data['party_name'],
-    #         legal_id=verified_data['party_legal_id']
-    #     )
-    #     Report.objects.get_or_create(
-    #         report_date=datetime.datetime.strptime(verified_data['report_date'], "%Y-%m-%d"),
-    #         party=party,
-    #         document_page_start=verified_data['page']
-    #     )
-    #
-    # def after_save(self, verified_data):
-    #     self.create_new_task(GetTransactionTask, **verified_data)
+    def create_mocked_task(self, task_data):
+        """
+        Return some mocked task data to ease development.
+
+        In normal conditions tasks will be created based on imported documents
+        or as a child-tasks of tasks verified by users.
+
+        :param task_data: Prepared default data to be updated
+        :return:
+        """
+
+        task_data['info'].update({
+            'url': 'http://www.parlament.hu/internet/cplsql/ogy_vagyonpub.vagyon_kiir_egys?P_FNEV=/2016/l001_j0161231k.pdf&p_cont=application/pdf',
+            'page': 10
+        })
+
+        return task_data
 
     def get_presenter(self):
         """
@@ -47,11 +46,59 @@ class TaskWithForm(AbstractTask):
         """
         return super(TaskWithForm, self).get_presenter()
 
+    def save_verified_data(self, verified_data):
+        """
+        Inputs provided by volunteers has been cross-checked.
+        Please save them here to your data model
+
+        :param verified_data: data as provided in the form
+        :return:
+        """
+
+        if verified_data.get('non_readable', False):
+            # Checkboxes won't be passed if not specified so we need default above
+            pass
+        else:
+            Document = MagicMock()  # quick hack, instead of defining it in models.py
+
+            Document.objects.get_or_create(
+                title=verified_data['title'],
+            )
+
+    def after_save(self, verified_data):
+        """
+        After cross-checking and saving task data you can create descendent tasks based on this one.
+
+        For example, if document contains multiple entries you can:
+        - ask in the parent task to list entries identifiers
+        - create here as many child-tasks as there are entries
+        - in child-task you ask to transribe specific entry details
+
+        :param verified_data:
+        :return:
+        """
+        self.create_new_task(TaskWithTemplate, {'page': 11})
+
 
 class TaskWithTemplate(AbstractTask):
-    # task_template = 'task.html'
-    # task_form = SimpleForm
     task_form_template = 'tasks/with_template.html'
 
     # verify_title = verifiers.equals
-    # verifiers.GeoProximity(10, "lat", "long")  # TODO
+    # verifiers = [verifiers.GeoProximity(10, "lat", "long")]
+
+    def save_verified_data(self, verified_data):
+        """
+        Inputs provided by volunteers has been cross-checked.
+        Please save them here to your data model
+
+        :param verified_data: data as provided in the form
+        :return:
+        """
+
+        Document = MagicMock()  # quick hack, instead of defining it in models.py
+
+        Document.objects.get_or_create(
+            title=verified_data['title'],
+            publisher=verified_data['publisher'],
+            pages_total=verified_data['pages_total']
+        )
