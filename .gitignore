@@ -1,1 +1,13 @@
 db.sqlite3
+.idea/
+__pycache__/
+node_modules/
+*.pyc
+.tox/
+.coverage
+*.egg-info
+.eggs/
+build/
+staticfiles/
+
+requirements-local.txt
